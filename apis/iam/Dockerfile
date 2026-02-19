@@ -1,14 +1,14 @@
-FROM node:20-alpine as base
+FROM node:20-alpine AS base
 
 FROM base AS builder
-RUN apk add --no-cache
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN npm i -g turbo
 COPY . .
-RUN turbo prune @btm/iam --docker
+RUN turbo prune @g4/identity-and-access --docker
 
 FROM base AS installer
-RUN apk add --no-cache
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 COPY .gitignore .gitignore
@@ -19,11 +19,11 @@ RUN npm ci
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN turbo run build --filter=@btm/iam
+RUN npx turbo run build --filter=@g4/identity-and-access
 
 FROM base AS runner
 WORKDIR /app
-RUN apk add --no-cache
+RUN apk add --no-cache openssl
 
 COPY --from=installer /app .
 
