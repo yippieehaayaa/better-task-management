@@ -1,0 +1,25 @@
+{
+    "name": "@g4/identity-and-access",
+    "version": "1.0.0",
+    "author": "Joshua Dave E. Oropilla <joshdave0915@gmail.com>",
+    "description": "Identity and Access Management API",
+    "license": "MIT",
+    "scripts": {
+        "build": "tsc",
+        "check-types": "turbo run check-types",
+        "dev": "tsx watch ./src/index.ts",
+        "lint": "turbo run lint"
+    },
+    "dependencies": {
+        "express": "5.2.1",
+        "helmet": "^8.1.0",
+        "morgan": "^1.10.1",
+        "tsx": "^4.21.0"
+    },
+    "devDependencies": {
+        "@btm/typescript-config": "*",
+        "@types/express": "^5.0.6",
+        "@types/morgan": "^1.9.10",
+        "typescript": "5.9.2"
+    }
+}

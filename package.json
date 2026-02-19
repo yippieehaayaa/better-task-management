@@ -1,15 +1,23 @@
 {
-  "name": "better-task-management",
+  "name": "btm",
   "private": true,
+  "author": "Joshua Dave E. Oropilla <joshdave0915@gmail.com>",
   "scripts": {
     "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "deps:audit": "syncpack list",
+    "deps:fix": "syncpack fix-mismatches",
+    "deps:format": "syncpack format",
+    "deps:mismatch": "syncpack list-mismatches",
+    "deps:update": "syncpack update --specs=latest,range && syncpack fix-mismatches",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --fix ."
   },
   "devDependencies": {
-    "prettier": "^3.7.4",
+    "@biomejs/biome": "2.4.2",
+    "syncpack": "^14.0.0",
     "turbo": "^2.8.10",
     "typescript": "5.9.2"
   },
@@ -18,7 +26,12 @@
   },
   "packageManager": "npm@11.3.0",
   "workspaces": [
+    "apis/*",
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "zod": "^4.3.6"
+  }
 }
