@@ -5,7 +5,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 RUN npm i -g turbo
 COPY . .
-RUN turbo prune @g4/identity-and-access --docker
+RUN turbo prune @btm/iam --docker
 
 FROM base AS installer
 RUN apk add --no-cache libc6-compat openssl
@@ -19,7 +19,7 @@ RUN npm ci
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN npx turbo run build --filter=@g4/identity-and-access
+RUN npx turbo run build --filter=@btm/iam
 
 FROM base AS runner
 WORKDIR /app
