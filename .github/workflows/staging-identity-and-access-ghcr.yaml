@@ -29,10 +29,10 @@ jobs:
       packages: write
     uses: ./.github/workflows/build-api-ghcr-base.yaml
     with:
-      IMAGE_NAME: identity-and-access
+      IMAGE_NAME: iam
       IMAGE_TAG: ${{ github.ref_name == 'staging' && 'latest' || github.ref_name }}
       DOCKER_FILE: ./apis/iam/Dockerfile
-      TURBO_APP: "@g4/identity-and-access"
+      TURBO_APP: "@btm/iam"
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     secrets:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
