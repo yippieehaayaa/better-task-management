@@ -1,5 +1,5 @@
 {
-    "name": "@g4/identity-and-access",
+    "name": "@btm/iam",
     "version": "1.0.0",
     "author": "Joshua Dave E. Oropilla <joshdave0915@gmail.com>",
     "description": "Identity and Access Management API",
