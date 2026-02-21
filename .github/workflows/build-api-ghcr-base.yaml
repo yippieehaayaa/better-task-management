@@ -28,7 +28,7 @@ on:
 
 env:
   REGISTRY_URL: ghcr.io
-  NODE_ENV: ${{ github.ref_name == 'master' && 'production' || github.ref_name }}
+  NODE_ENV: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
 
 jobs:
   build:
@@ -39,7 +39,7 @@ jobs:
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
       TURBO_TEAM: ${{ inputs.TURBO_TEAM }}
-      NODE_ENV: ${{ github.ref_name == 'master' && 'production' || github.ref_name }}
+      NODE_ENV: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
 
       - name: Build Application
         env:
-          NODE_ENV: ${{ github.ref_name == 'master' && 'production' || github.ref_name }}
+          NODE_ENV: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
         run: npx turbo run build --filter=${{ inputs.TURBO_APP }}
 
       - name: Set up QEMU
@@ -84,7 +84,7 @@ jobs:
           context: .
           build-args: |
             TURBO_TEAM=${{ inputs.TURBO_TEAM }}
-            NODE_ENV=${{ github.ref_name == 'master' && 'production' || github.ref_name }}
+            NODE_ENV=${{ github.ref_name == 'main' && 'production' || github.ref_name }}
           secrets: |
             turbo_token=${{ secrets.TURBO_TOKEN }}
           file: ${{ inputs.DOCKER_FILE }}
