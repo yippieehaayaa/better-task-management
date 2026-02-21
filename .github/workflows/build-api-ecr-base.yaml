@@ -9,7 +9,6 @@ on:
       IMAGE_TAG:
         required: false
         type: string
-        default: "staging"
       DOCKER_FILE:
         required: true
         type: string

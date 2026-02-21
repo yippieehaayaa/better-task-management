@@ -9,7 +9,7 @@ jobs:
     uses: ./.github/workflows/build-api-ecr-base.yaml
     with:
       ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY_STAGING }}
-      IMAGE_TAG: stg
+      IMAGE_TAG: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
       DOCKER_FILE: ./apis/identity-and-access/Dockerfile
       TURBO_APP: "@btm/identity-and-access"
       TURBO_TEAM: ${{ vars.TURBO_TEAM }}
