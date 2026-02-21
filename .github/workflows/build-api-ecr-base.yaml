@@ -54,7 +54,7 @@ jobs:
           cache: "npm"
 
       - name: Install Application Dependencies
-        run: npm ci
+        run: npm ci --include=dev
 
       - name: Run Prebuild
         if: ${{ inputs.PREBUILD_COMMAND != '' && inputs.PREBUILD_COMMAND != null }}
