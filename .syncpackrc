@@ -24,7 +24,7 @@
   "versionGroups": [
     {
       "label": "Internal packages",
-      "dependencies": ["@g4/*"],
+      "dependencies": ["@btm/*"],
       "pinVersion": "*"
     },
     {
@@ -41,6 +41,11 @@
       "label": "Pin prisma to exact version",
       "dependencies": ["prisma", "@prisma/client"],
       "pinVersion": "6.19.0"
+    },
+    {
+      "label": "Pin biome to exact version",
+      "dependencies": ["@biomejs/biome"],
+      "pinVersion": "2.4.4"
     }
   ]
 }
