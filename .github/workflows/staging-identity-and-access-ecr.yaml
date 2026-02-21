@@ -3,43 +3,19 @@ name: Build and Push Identity and Access to ECR
 on:
   workflow_dispatch:
 
-env:
-  ECR_IMAGE: ${{ vars.ECR_REPOSITORY_STAGING }}
-  AWS_DEFAULT_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
-
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
-
-      - name: Create ECR repository
-        run: |
-          aws ecr describe-repositories --repository-names $ECR_IMAGE --region $AWS_DEFAULT_REGION 2>/dev/null || \
-          aws ecr create-repository --repository-name $ECR_IMAGE --region $AWS_DEFAULT_REGION
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-
-      - name: Build and push Docker image
-        run: |
-          docker buildx build \
-            --platform linux/arm64 \
-            -f apis/identity-and-access/Dockerfile \
-            -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_IMAGE:staging \
-            --push .
+    name: Build and push to ECR
+    uses: ./.github/workflows/build-api-ecr-base.yaml
+    with:
+      ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY_STAGING }}
+      IMAGE_TAG: stg
+      DOCKER_FILE: ./apis/identity-and-access/Dockerfile
+      TURBO_APP: "@btm/identity-and-access"
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+    secrets:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}

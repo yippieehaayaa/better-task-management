@@ -1,0 +1,105 @@
+name: Build API Base ECR Workflow
+
+on:
+  workflow_call:
+    inputs:
+      ECR_REPOSITORY:
+        required: true
+        type: string
+      IMAGE_TAG:
+        required: false
+        type: string
+        default: "staging"
+      DOCKER_FILE:
+        required: true
+        type: string
+      TURBO_APP:
+        required: true
+        type: string
+      TURBO_TEAM:
+        required: true
+        type: string
+      AWS_REGION:
+        required: false
+        type: string
+        default: "us-east-1"
+      PREBUILD_COMMAND:
+        required: false
+        type: string
+    secrets:
+      TURBO_TOKEN:
+        required: true
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ inputs.TURBO_TEAM }}
+      NODE_ENV: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Application Dependencies
+        run: npm ci
+
+      - name: Run Prebuild
+        if: ${{ inputs.PREBUILD_COMMAND != '' && inputs.PREBUILD_COMMAND != null }}
+        run: ${{ inputs.PREBUILD_COMMAND }}
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build Application
+        env:
+          NODE_ENV: ${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+        run: npx turbo run build --filter=${{ inputs.TURBO_APP }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.AWS_REGION }}
+
+      - name: Create ECR repository
+        run:
+          aws ecr describe-repositories --repository-names ${{ inputs.ECR_REPOSITORY }} --region ${{ inputs.AWS_REGION }} 2>/dev/null || \
+          aws ecr create-repository --repository-name ${{ inputs.ECR_REPOSITORY }} --region ${{ inputs.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          build-args: |
+            TURBO_TEAM=${{ inputs.TURBO_TEAM }}
+            NODE_ENV=${{ github.ref_name == 'main' && 'production' || github.ref_name }}
+          secrets: |
+            turbo_token=${{ secrets.TURBO_TOKEN }}
+          file: ${{ inputs.DOCKER_FILE }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ github.repository }}/${{ inputs.ECR_REPOSITORY }}:${{ inputs.IMAGE_TAG }}
